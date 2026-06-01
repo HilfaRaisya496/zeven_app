@@ -35,3 +35,141 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  --ion-font-family: 'Inter', sans-serif;
+}
+
+/* Zeven Utility Classes */
+.zeven-bg {
+  --background: #F9F6F0 !important;
+}
+
+.zeven-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.zeven-shadow {
+  box-shadow: 0 8px 24px rgba(17, 66, 50, 0.08);
+}
+
+.zeven-gradient-btn {
+  --background: linear-gradient(135deg, #114232 0%, #295546 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 14px rgba(17, 66, 50, 0.3);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.zeven-input {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.zeven-heading {
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  margin: 0;
+}
+
+.zeven-subheading {
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  font-size: 14px;
+}
+
+.zeven-price {
+  color: var(--ion-color-secondary);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.product-image-container {
+  width: 100%;
+  padding-top: 100%;
+  /* 1:1 Aspect Ratio */
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f4f5f8;
+  margin-bottom: 12px;
+}
+
+.product-image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 0 16px;
+}
+
+.section-title h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  margin: 0;
+}
+
+.section-title a {
+  font-size: 14px;
+  color: var(--ion-color-secondary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* Force ion-tab-bar to allow overflow for FAB buttons */
+ion-tab-bar,
+ion-tab-button {
+  contain: none !important;
+  overflow: visible !important;
+}
+
+/* Fix iOS safe area for headers if needed */
+ion-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+.zeven-bg {
+  --background: #F9F6F0 !important;
+  background-color: #F9F6F0 !important;
+}
+
+.categories-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 16px !important;
+  margin: 24px 0 !important;
+}
+
+ion-toolbar {
+  --background: transparent;
+}
