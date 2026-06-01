@@ -529,7 +529,6 @@ export class HomePage implements OnInit {
                 <h4 class="seller-name-label">{{ product.seller?.name || 'Zeven Premium Store' }}</h4>
                 <div class="seller-status"><span class="status-indicator"></span> Online Baru saja</div>
               </div>
-              <ion-button fill="outline" size="small" class="follow-btn">Ikuti</ion-button>
             </div>
 
             <div class="section-container">
@@ -729,7 +728,7 @@ export class HomePage implements OnInit {
     .seller-name-label { margin: 0 0 4px; font-size: 15px; font-weight: 700; color: #333; }
     .seller-status { font-size: 11px; color: #666; display: flex; align-items: center; gap: 5px; }
     .status-indicator { width: 6px; height: 6px; background: #28ba62; border-radius: 50%; }
-    .follow-btn { --border-radius: 8px; font-weight: 700; text-transform: none; margin: 0; min-height: 32px; }
+
 
     .section-container { margin-top: 24px; }
     .section-label { font-size: 16px; font-weight: 700; color: #114232; margin-bottom: 12px; }
