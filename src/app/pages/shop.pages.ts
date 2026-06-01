@@ -165,8 +165,7 @@ export class FilterModalComponent implements OnInit {
           </ion-grid>
 
           <div class="section-header">
-            <h2>Rekomendasi Terpopuler</h2>
-            <ion-button fill="clear" size="small" color="secondary">Lihat Semua</ion-button>
+            <h2>Produk Terbaru</h2>
           </div>
         </ng-container>
 

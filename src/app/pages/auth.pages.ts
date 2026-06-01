@@ -77,47 +77,147 @@ import { AuthService } from '../services/auth.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class SplashPage {
-  constructor(private router: Router) {
+  constructor(private router: Router, private authService: AuthService) {
     setTimeout(() => {
-      this.router.navigate(['/onboarding']);
+      if (this.authService.isAuthenticated()) {
+        const user = this.authService.getCurrentUser();
+        if (user && !localStorage.getItem('hasAgreedTerms_' + user.id)) {
+          this.router.navigate(['/onboarding']);
+        } else {
+          this.router.navigate(['/tabs/home']);
+        }
+      } else {
+        this.router.navigate(['/login']);
+      }
     }, 2500);
   }
 }
 
+import { register } from 'swiper/element/bundle';
+register();
+
 @Component({
   selector: 'app-onboarding',
   template: `
-    <ion-content class="zeven-bg">
-      <div class="onboarding-container">
-        <div class="illustration">
-          <div class="circle-bg"></div>
-          <ion-icon name="cart-outline" class="main-icon"></ion-icon>
-        </div>
-        <div class="text-content">
-          <h1 class="zeven-heading">Temukan & Belanja</h1>
-          <p>Rasakan era baru social commerce. Terhubung dengan penjual, tonton siaran langsung, dan beli produk premium dengan mudah.</p>
-        </div>
+    <ion-content class="zeven-bg" scrollY="false">
+      <swiper-container [pagination]="true" style="height: 100%;">
         
-        <div class="actions">
-          <div class="dots">
-            <span class="dot active"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
+        <!-- Slide 1 -->
+        <swiper-slide>
+          <div class="onboarding-slide">
+            <div class="illustration">
+              <div class="circle-bg"></div>
+              <ion-icon name="cart-outline" class="main-icon"></ion-icon>
+            </div>
+            <div class="text-content">
+              <h1 class="zeven-heading">Temukan & Belanja</h1>
+              <p>Rasakan kemudahan berbelanja. Terhubung langsung dengan penjual melalui fitur obrolan (chat), dan beli produk impian Anda dengan mudah.</p>
+            </div>
           </div>
-          <ion-button expand="block" class="zeven-gradient-btn" (click)="getStarted()">
-            Mulai
-          </ion-button>
-        </div>
-      </div>
+        </swiper-slide>
+        
+        <!-- Slide 2 -->
+        <swiper-slide>
+          <div class="onboarding-slide">
+            <div class="illustration">
+              <div class="circle-bg" style="background: linear-gradient(135deg, rgba(40,186,98,0.1) 0%, rgba(17,66,50,0.1) 100%);"></div>
+              <ion-icon name="people-outline" class="main-icon"></ion-icon>
+            </div>
+            <div class="text-content">
+              <h1 class="zeven-heading">Komunitas Zeven</h1>
+              <p>Bergabung dengan ribuan pengguna. Bangun reputasi Anda dan temukan penawaran terbaik setiap harinya dari penjual terpercaya.</p>
+            </div>
+          </div>
+        </swiper-slide>
+        
+        <!-- Slide 3 -->
+        <swiper-slide>
+          <div class="onboarding-slide">
+            <div class="illustration">
+              <div class="circle-bg" style="background: linear-gradient(135deg, rgba(198,142,23,0.1) 0%, rgba(40,186,98,0.1) 100%);"></div>
+              <ion-icon name="shield-checkmark-outline" class="main-icon"></ion-icon>
+            </div>
+            <div class="text-content">
+              <h1 class="zeven-heading">Aman & Terpercaya</h1>
+              <p>Transaksi dilindungi keamanan tingkat tinggi. Silakan baca Kebijakan Privasi kami untuk mulai menggunakan aplikasi.</p>
+            </div>
+            <div class="actions">
+              <div class="terms-checkbox" (click)="openTermsModal()">
+                <ion-checkbox [(ngModel)]="agreedToTerms" color="primary" disabled></ion-checkbox>
+                <span class="terms-text">
+                  Saya menyetujui <a style="cursor:pointer; color:var(--ion-color-primary);">Syarat & Ketentuan dan Kebijakan Privasi</a>.
+                </span>
+              </div>
+              <ion-button expand="block" class="zeven-gradient-btn" (click)="getStarted()" [disabled]="!agreedToTerms">
+                Mulai Belanja
+              </ion-button>
+            </div>
+          </div>
+        </swiper-slide>
+        
+      </swiper-container>
+
+      <!-- Terms Modal -->
+      <ion-modal [isOpen]="isTermsModalOpen" (didDismiss)="isTermsModalOpen = false">
+        <ng-template>
+          <ion-header class="ion-no-border">
+            <ion-toolbar>
+              <ion-title>Kebijakan Privasi</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="closeTermsModal()">Tutup</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="ion-padding terms-scroll-content" [scrollEvents]="true" (ionScroll)="onScroll($event)">
+            <div class="terms-document">
+              <h3>1. Pendahuluan</h3>
+              <p>Selamat datang di Zeven. Dengan menggunakan aplikasi ini, Anda setuju untuk terikat dengan Syarat & Ketentuan ini. Zeven adalah platform Social Commerce yang memfasilitasi transaksi antara penjual dan pembeli.</p>
+              
+              <h3>2. Data Pribadi</h3>
+              <p>Kami mengumpulkan data pribadi Anda (seperti nama, email, dan alamat pengiriman) hanya untuk keperluan pemrosesan pesanan dan peningkatan layanan. Data Anda dienkripsi dan disimpan dengan aman.</p>
+              
+              <h3>3. Pembayaran & Transaksi</h3>
+              <p>Semua transaksi pembayaran diproses melalui gateway pembayaran resmi (Midtrans) yang dijamin keamanannya. Kami tidak menyimpan detail kartu kredit/debit Anda di server kami.</p>
+              
+              <h3>4. Kebijakan Pemesanan</h3>
+              <p>Pesanan yang telah berhasil dibayar akan langsung diteruskan ke penjual. Harap pastikan kembali detail pesanan Anda sebelum melakukan pembayaran akhir.</p>
+
+              <h3>5. Tanggung Jawab Penjual</h3>
+              <p>Penjual bertanggung jawab penuh atas kualitas produk yang dikirimkan. Segala bentuk penipuan akan ditindak secara tegas dan akun akan di-banned permanen.</p>
+
+              <h3>6. Penyelesaian Sengketa</h3>
+              <p>Jika terjadi perselisihan antara pembeli dan penjual, Zeven akan bertindak sebagai mediator untuk mencari jalan tengah yang adil bagi kedua belah pihak.</p>
+              
+              <div style="height: 150px; display:flex; align-items:flex-end; justify-content:center;">
+                 <p style="color:var(--ion-color-medium); font-size:13px; font-weight:600; animation: bounce 2s infinite;">⬇ Scroll ke bawah untuk menyetujui ⬇</p>
+              </div>
+              <div style="height: 50px;"></div>
+            </div>
+          </ion-content>
+          <ion-footer class="ion-no-border" style="padding: 16px;">
+            <ion-button expand="block" [color]="hasReadTerms ? 'primary' : 'medium'" [disabled]="!hasReadTerms" (click)="agreeToTerms()" class="zeven-gradient-btn" style="opacity: {{hasReadTerms ? 1 : 0.6}};">
+              {{ hasReadTerms ? 'Saya Setuju' : 'Baca Sampai Akhir' }}
+            </ion-button>
+          </ion-footer>
+        </ng-template>
+      </ion-modal>
     </ion-content>
   `,
   styles: [`
-    .onboarding-container {
+    swiper-container {
+      --swiper-pagination-color: var(--ion-color-primary);
+      --swiper-pagination-bullet-inactive-color: var(--ion-color-medium);
+      --swiper-pagination-bullet-inactive-opacity: 0.3;
+      --swiper-pagination-bullet-size: 8px;
+    }
+    .onboarding-slide {
       height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 40px 24px;
-      justify-content: space-between;
+      padding: 40px 24px 80px;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
     }
     .illustration {
       flex: 1;
@@ -125,6 +225,8 @@ export class SplashPage {
       justify-content: center;
       align-items: center;
       position: relative;
+      width: 100%;
+      max-height: 350px;
     }
     .circle-bg {
       width: 250px;
@@ -140,7 +242,8 @@ export class SplashPage {
     }
     .text-content {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
+      width: 100%;
     }
     .text-content h1 {
       font-size: 28px;
@@ -152,39 +255,96 @@ export class SplashPage {
       font-size: 16px;
     }
     .actions {
-      margin-bottom: 20px;
+      width: 100%;
+      margin-top: 10px;
     }
-    .dots {
+    .terms-checkbox {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin-bottom: 32px;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 10px;
+      background: rgba(40,186,98,0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(40,186,98,0.2);
     }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--ion-color-medium);
-      opacity: 0.3;
-      transition: all 0.3s;
+    .terms-checkbox ion-checkbox {
+      --size: 20px;
+      pointer-events: none;
     }
-    .dot.active {
-      width: 24px;
-      opacity: 1;
-      background: var(--ion-color-secondary);
+    .terms-text {
+      font-size: 13px;
+      color: var(--ion-color-medium);
+      line-height: 1.4;
+      text-align: left;
+    }
+    .terms-document h3 {
+      font-size: 16px;
+      color: var(--ion-color-dark);
+      margin-top: 20px;
+      font-weight: 700;
+    }
+    .terms-document p {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      line-height: 1.6;
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-10px);}
+      60% {transform: translateY(-5px);}
     }
   `],
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, FormsModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class OnboardingPage {
-  constructor(private router: Router) { }
+  agreedToTerms = false;
+  isTermsModalOpen = false;
+  hasReadTerms = false;
+  
+  constructor(private router: Router, private authService: AuthService) { }
+  
   getStarted() {
     if (document.activeElement) {
       (document.activeElement as HTMLElement).blur();
     }
-    this.router.navigate(['/login']);
+    // Simpan status bahwa user ini sudah menyetujui terms
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      localStorage.setItem('hasAgreedTerms_' + user.id, 'true');
+    }
+    this.router.navigate(['/tabs/home']);
+  }
+
+  openTermsModal() {
+    if(!this.agreedToTerms) {
+      this.isTermsModalOpen = true;
+    }
+  }
+
+  closeTermsModal() {
+    this.isTermsModalOpen = false;
+  }
+
+  agreeToTerms() {
+    this.agreedToTerms = true;
+    this.isTermsModalOpen = false;
+  }
+
+  onScroll(event: any) {
+    if (this.hasReadTerms) return;
+    
+    // Fallback detection using event detail if getScrollElement is tricky
+    // Actually, in Ionic the easiest way is to use event.target
+    const scrollElement = event.target;
+    scrollElement.getScrollElement().then((el: HTMLElement) => {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 60) {
+        this.hasReadTerms = true;
+      }
+    });
   }
 }
 
@@ -213,7 +373,7 @@ export class OnboardingPage {
         </ion-item>
 
         <div class="forgot-password">
-          <a>Lupa Kata Sandi?</a>
+          <a (click)="forgotPassword()" style="cursor: pointer;">Lupa Kata Sandi?</a>
         </div>
 
         <ion-button expand="block" class="zeven-gradient-btn ion-margin-top" (click)="login()" [disabled]="isLoading">
@@ -221,16 +381,6 @@ export class OnboardingPage {
           Masuk
         </ion-button>
 
-        <div class="divider">
-          <span>ATAU</span>
-        </div>
-
-        <div class="social-login">
-          <ion-button fill="outline" color="dark" class="social-btn">
-            <ion-icon name="logo-google" slot="start"></ion-icon>
-            Google
-          </ion-button>
-        </div>
 
         <div class="register-link">
           Belum punya akun? <a (click)="goToRegister()">Daftar</a>
@@ -336,6 +486,10 @@ export class LoginPage {
     this.showPassword = !this.showPassword;
   }
 
+  forgotPassword() {
+    this.presentToast('Silakan kirim email ke ubp.event.management@gmail.com untuk bantuan reset sandi.', 'warning', 'information-circle-outline');
+  }
+
   async login() {
     if (!this.email || !this.password) {
       this.presentToast('Harap isi semua kolom', 'warning', 'information-circle-outline');
@@ -347,7 +501,13 @@ export class LoginPage {
       next: (res) => {
         this.isLoading = false;
         this.presentToast('Selamat Datang Kembali!', 'success', 'checkmark-circle-outline');
-        this.router.navigate(['/tabs/home']);
+        
+        const userId = res.user?.id;
+        if (userId && !localStorage.getItem('hasAgreedTerms_' + userId)) {
+          this.router.navigate(['/onboarding']);
+        } else {
+          this.router.navigate(['/tabs/home']);
+        }
       },
       error: (err) => {
         this.isLoading = false;
