@@ -1445,52 +1445,29 @@ export class CheckoutPage implements OnInit {
     this.orderService.checkout(this.shippingAddress, this.voucherCode, cartItemIds).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.order && res.order.snap_token) {
-          (window as any).snap.pay(res.order.snap_token, {
-            onSuccess: (result: any) => {
-              this.presentToast('Pembayaran Berhasil!', 'success');
-              this.router.navigate(['/tabs/history']);
-            },
-            onPending: (result: any) => {
-              this.presentToast('Menunggu pembayaran diselesaikan', 'warning');
+        if (res && res.order && res.order.id) {
+          // Check if snap_token contains DOKU payment URL
+          if (res.order.snap_token && typeof res.order.snap_token === 'string' && res.order.snap_token.startsWith('https://')) {
+            // Open DOKU payment URL
+            const paymentUrl = res.order.snap_token;
+            this.presentToast('Membuka halaman pembayaran DOKU...', 'info');
+            window.open(paymentUrl, '_blank');
+            // Redirect to order tracking after short delay
+            setTimeout(() => {
               this.router.navigate(['/order-tracking', { id: res.order.id }]);
-            },
-            onError: (result: any) => {
-              this.presentToast('Pembayaran gagal', 'danger');
-              this.router.navigate(['/order-tracking', { id: res.order.id }]);
-            },
-            onClose: () => {
-              this.presentToast('Anda menutup pop-up pembayaran sebelum menyelesaikannya', 'warning');
-              this.router.navigate(['/order-tracking', { id: res.order.id }]);
-            }
-          });
-        } else if (res && res.order && res.order.id) {
-          this.showSuccessAlert(res.order.id, res.order.final_price);
+            }, 1000);
+          } else {
+            // Fallback: just redirect to order tracking
+            this.presentToast('Pesanan berhasil dibuat! Silakan lakukan pembayaran.', 'success');
+            this.router.navigate(['/order-tracking', { id: res.order.id }]);
+          }
         } else {
           this.presentToast('Pesanan Berhasil!', 'success');
           this.router.navigate(['/tabs/history']);
         }
       },
-      error: (err) => { this.isLoading = false; this.presentToast(err.error?.message || 'Gagal', 'danger'); }
+      error: (err) => { this.isLoading = false; this.presentToast(err.error?.message || 'Gagal membuat pesanan', 'danger'); }
     });
-  }
-
-  async showSuccessAlert(orderId: number, totalPrice: number) {
-    const alert = await this.alertCtrl.create({
-      header: 'Pesanan Berhasil! 🎉',
-      subHeader: 'Langkah Selanjutnya: Pembayaran',
-      message: `Pesanan Anda telah berhasil dibuat. Silakan lakukan pembayaran sebesar Rp${Number(totalPrice).toLocaleString('id-ID')} ke rekening BCA kami di halaman berikutnya, lalu unggah bukti transfer.`,
-      buttons: [
-        {
-          text: 'Bayar Sekarang',
-          handler: () => {
-            this.router.navigate(['/order-tracking', { id: orderId }]);
-          }
-        }
-      ],
-      backdropDismiss: false
-    });
-    await alert.present();
   }
 
   async presentToast(message: string, color: string) {

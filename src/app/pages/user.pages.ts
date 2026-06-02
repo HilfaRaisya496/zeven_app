@@ -116,88 +116,33 @@ import { AddressService } from '../services/address.service';
             Informasi Pembayaran
           </h3>
           
-          <!-- Bank Account Info for transfer -->
-          <div class="bank-details-card" style="background: #F9F6F0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-            <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #C68E17; text-transform: uppercase; letter-spacing: 0.5px;">Transfer Bank</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 13px; color: #555;">Bank:</span>
-              <strong style="font-size: 14px; color: #114232;">BCA (Bank Central Asia)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 13px; color: #555;">No. Rekening:</span>
-              <span style="display: flex; align-items: center; gap: 6px;">
-                <strong style="font-size: 15px; color: #114232;">772-0988-123</strong>
-                <ion-button fill="clear" size="small" style="--padding-start: 4px; --padding-end: 4px; height: 20px; margin: 0;" (click)="copyText('7720988123')">
-                  <ion-icon slot="icon-only" name="copy-outline" style="font-size: 14px;" color="secondary"></ion-icon>
-                </ion-button>
-              </span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 13px; color: #555;">Atas Nama:</span>
-              <strong style="font-size: 13px; color: #114232;">PT ZEVEN MARKETPLACE INDONESIA</strong>
-            </div>
-          </div>
-
           <!-- If Payment Status is Pending or Failed (or no transaction yet) -->
           <div *ngIf="!order.transaction || order.transaction.payment_status === 'pending' || order.transaction.payment_status === 'failed'">
             
-            <!-- MIDTRANS RE-PAY BUTTON -->
-            <div *ngIf="order.snap_token" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed #ccc;">
+            <!-- DOKU PAYMENT BUTTON -->
+            <div *ngIf="order.snap_token" style="margin-bottom: 16px;">
               <p style="font-size: 13px; color: #114232; margin-bottom: 12px; font-weight: 600; text-align: center;">
-                Belum menyelesaikan pembayaran otomatis?
+                Silakan selesaikan pembayaran menggunakan gateway DOKU
               </p>
-              <ion-button expand="block" class="zeven-gradient-btn" (click)="payWithMidtrans()" style="--background: linear-gradient(135deg, #114232 0%, #295546 100%);">
+              <ion-button expand="block" class="zeven-gradient-btn" (click)="payWithDoku()" style="--background: linear-gradient(135deg, #114232 0%, #295546 100%);">
                 <ion-icon name="card-outline" slot="start"></ion-icon>
-                Buka Pembayaran Otomatis
+                Lanjutkan ke Pembayaran DOKU
               </ion-button>
             </div>
             
-            <p style="font-size: 13px; color: #666; margin-bottom: 12px; font-weight: bold; text-align: center;">ATAU CARA MANUAL:</p>
             <div style="background: #fff5f5; border: 1px solid #ffd8d8; border-radius: 8px; padding: 12px; margin-bottom: 16px;" *ngIf="order.transaction?.payment_status === 'failed'">
               <p style="margin: 0; font-size: 12px; color: #c0392b; font-weight: 600;">
-                ❌ Pembayaran ditolak oleh Admin. Silakan transfer ulang ke rekening di atas dan unggah bukti transfer yang valid.
+                ❌ Pembayaran ditolak. Silakan coba lagi melalui tombol di atas.
               </p>
             </div>
-            
-            <p style="font-size: 13px; color: #666; margin-bottom: 12px;">Silakan upload foto/gambar bukti transfer Anda di bawah ini:</p>
-            
-            <!-- Custom File Input -->
-            <div class="file-upload-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; position: relative;" (click)="fileInput.click()">
-              <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-              <div *ngIf="!selectedFile">
-                <ion-icon name="cloud-upload-outline" style="font-size: 40px; color: #888; margin-bottom: 8px;"></ion-icon>
-                <p style="margin: 0; font-size: 13px; font-weight: 600; color: #555;">Pilih Foto Bukti Transfer</p>
-                <span style="font-size: 11px; color: #999;">Format: JPG, PNG, WEBP (Maks 4MB)</span>
-              </div>
-              <div *ngIf="selectedFile" style="width: 100%;">
-                <ion-icon name="image-outline" style="font-size: 40px; color: var(--ion-color-primary); margin-bottom: 8px;"></ion-icon>
-                <p style="margin: 0; font-size: 13px; font-weight: 700; color: #114232; word-break: break-all;">{{ selectedFile.name }}</p>
-                <span style="font-size: 11px; color: #666;">Ukuran: {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
-              </div>
-            </div>
-
-            <!-- Image Preview if selected -->
-            <div *ngIf="imagePreview" style="margin-top: 16px; text-align: center; border-radius: 12px; overflow: hidden; max-height: 200px; border: 1px solid #eee;">
-              <img [src]="imagePreview" style="max-height: 200px; width: auto; object-fit: contain;">
-            </div>
-
-            <ion-button expand="block" class="zeven-gradient-btn ion-margin-top" [disabled]="!selectedFile || isUploading" (click)="submitPaymentProof()">
-              <ion-spinner name="crescent" *ngIf="isUploading" color="light" style="margin-right: 8px;"></ion-spinner>
-              {{ isUploading ? 'Mengunggah...' : 'Kirim Bukti Pembayaran' }}
-            </ion-button>
           </div>
 
           <!-- If Payment Status is Checking Admin -->
           <div *ngIf="order.transaction && order.transaction.payment_status === 'checking'" style="text-align: center; padding: 12px 0;">
             <div style="background: #FFF3E0; border: 1px solid #FFE0B2; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
               <ion-icon name="time" style="font-size: 36px; color: #EF6C00;" class="animate-pulse"></ion-icon>
-              <h4 style="margin: 0; font-weight: 700; color: #E65100;">Checking Admin</h4>
-              <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.4;">Bukti transfer Anda telah dikirim dan sedang dalam proses verifikasi oleh Admin.</p>
-            </div>
-            
-            <div *ngIf="order.transaction.payment_proof" style="margin-top: 16px;">
-              <p style="font-size: 11px; color: #888; margin-bottom: 6px; text-align: left; font-weight: 600;">Bukti yang Diunggah:</p>
-              <img [src]="productService.storageUrl + order.transaction.payment_proof" style="max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain;">
+              <h4 style="margin: 0; font-weight: 700; color: #E65100;">Memproses Pembayaran</h4>
+              <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.4;">Pembayaran Anda sedang diverifikasi. Silakan tunggu beberapa saat.</p>
             </div>
           </div>
 
@@ -205,13 +150,8 @@ import { AddressService } from '../services/address.service';
           <div *ngIf="order.transaction && order.transaction.payment_status === 'success'" style="text-align: center; padding: 12px 0;">
             <div style="background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
               <ion-icon name="checkmark-circle" style="font-size: 36px; color: #2E7D32;"></ion-icon>
-              <h4 style="margin: 0; font-weight: 700; color: #1B5E20;">Success / Pembayaran Berhasil</h4>
-              <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.4;">Terima kasih! Pembayaran Anda telah dikonfirmasi dan pesanan segera diproses.</p>
-            </div>
-            
-            <div *ngIf="order.transaction.payment_proof" style="margin-top: 16px;">
-              <p style="font-size: 11px; color: #888; margin-bottom: 6px; text-align: left; font-weight: 600;">Bukti Pembayaran Anda:</p>
-              <img [src]="productService.storageUrl + order.transaction.payment_proof" style="max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain;">
+              <h4 style="margin: 0; font-weight: 700; color: #1B5E20;">Pembayaran Berhasil</h4>
+              <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.4;">Terima kasih! Pembayaran Anda telah dikonfirmasi dan pesanan sedang diproses.</p>
             </div>
           </div>
         </div>
@@ -327,23 +267,23 @@ export class OrderTrackingPage implements OnInit {
     });
   }
 
-  payWithMidtrans() {
-    if (!this.order || !this.order.snap_token) return;
-    (window as any).snap.pay(this.order.snap_token, {
-      onSuccess: (result: any) => {
-        this.presentToast('Pembayaran Berhasil!');
+  payWithDoku() {
+    if (!this.order || !this.order.snap_token) {
+      this.presentToast('URL pembayaran tidak tersedia');
+      return;
+    }
+    
+    // Check if snap_token is a DOKU payment URL
+    if (typeof this.order.snap_token === 'string' && this.order.snap_token.startsWith('https://')) {
+      this.presentToast('Membuka halaman pembayaran DOKU...');
+      window.open(this.order.snap_token, '_blank');
+      // Refresh order details after a delay
+      setTimeout(() => {
         this.fetchOrderDetails(this.order.id);
-      },
-      onPending: (result: any) => {
-        this.presentToast('Menunggu pembayaran diselesaikan');
-      },
-      onError: (result: any) => {
-        this.presentToast('Pembayaran gagal');
-      },
-      onClose: () => {
-        this.presentToast('Anda menutup pop-up pembayaran sebelum menyelesaikannya');
-      }
-    });
+      }, 2000);
+    } else {
+      this.presentToast('Format URL pembayaran tidak valid');
+    }
   }
 
   async copyText(text: string) {
