@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, AlertController } from '@ionic/angular';
+import { Platform, AlertController, ToastController } from '@ionic/angular';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { App } from '@capacitor/app';
@@ -16,7 +16,8 @@ export class AppComponent {
     private platform: Platform,
     private alertController: AlertController,
     private location: Location,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {
     this.initializeApp();
   }
@@ -33,6 +34,33 @@ export class AppComponent {
         }
       }
       this.setupBackButtonBehavior();
+      this.setupNetworkListener();
+    });
+  }
+
+  setupNetworkListener() {
+    window.addEventListener('offline', async () => {
+      const toast = await this.toastController.create({
+        message: 'Koneksi internet terputus. Anda sedang offline.',
+        duration: 4000,
+        color: 'danger',
+        icon: 'wifi-outline',
+        position: 'top',
+        cssClass: 'network-toast'
+      });
+      await toast.present();
+    });
+
+    window.addEventListener('online', async () => {
+      const toast = await this.toastController.create({
+        message: 'Koneksi kembali pulih. Anda sudah online!',
+        duration: 3000,
+        color: 'success',
+        icon: 'wifi-outline',
+        position: 'top',
+        cssClass: 'network-toast'
+      });
+      await toast.present();
     });
   }
 

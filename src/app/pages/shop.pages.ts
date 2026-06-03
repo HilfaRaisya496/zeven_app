@@ -107,7 +107,7 @@ export class FilterModalComponent implements OnInit {
   selector: 'app-home',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary" style="--padding-top: 4px; --padding-bottom: 4px;">
+      <ion-toolbar style="--background: #114232; --padding-top: 4px; --padding-bottom: 4px;">
         <div class="header-row">
           <div class="logo-small">
             <span class="z">Z</span><span class="seven">7</span>
@@ -123,11 +123,11 @@ export class FilterModalComponent implements OnInit {
           
           <div class="header-actions" style="display: flex; gap: 4px;">
             <ion-button (click)="goToCart()" fill="clear" class="header-icon-btn" style="position: relative;">
-              <ion-icon name="cart-outline" style="color: #114232; font-size: 24px;"></ion-icon>
+              <ion-icon name="cart-outline" style="color: #ffffff; font-size: 24px;"></ion-icon>
               <ion-badge *ngIf="cartCount > 0" color="danger" class="badge-overlay">{{ cartCount }}</ion-badge>
             </ion-button>
             <ion-button (click)="goToChatList()" fill="clear" class="header-icon-btn" style="position: relative;">
-              <ion-icon name="chatbubble-ellipses-outline" style="color: #114232; font-size: 24px;"></ion-icon>
+              <ion-icon name="chatbubble-ellipses-outline" style="color: #ffffff; font-size: 24px;"></ion-icon>
               <ion-badge *ngIf="unreadChatCount > 0" color="danger" class="badge-overlay">{{ unreadChatCount }}</ion-badge>
             </ion-button>
           </div>
@@ -228,7 +228,7 @@ export class FilterModalComponent implements OnInit {
       width: 100% !important;
       padding: 0 8px;
     }
-    .z { color: var(--ion-color-primary); }
+    .z { color: #ffffff; }
     .seven { color: var(--ion-color-secondary); }
     
     .search-bar { 
@@ -527,7 +527,7 @@ export class HomePage implements OnInit {
               </div>
               <div class="seller-info-text">
                 <h4 class="seller-name-label">{{ product.seller?.name || 'Zeven Premium Store' }}</h4>
-                <div class="seller-status"><span class="status-indicator"></span> Online Baru saja</div>
+                <!-- <div class="seller-status"><span class="status-indicator"></span> Online Baru saja</div> -->
               </div>
             </div>
 
@@ -957,7 +957,14 @@ export class ProductDetailPage implements OnInit {
         this.fetchCartCount();
         if (!silent) this.presentToast(`${this.quantity} produk ditambahkan`, 'success', 'cart-outline');
       },
-      error: () => { this.isAdding = false; this.presentToast('Gagal menambahkan ke keranjang', 'danger', 'alert-circle-outline'); }
+      error: (err) => { 
+        this.isAdding = false; 
+        if (err.status === 403) {
+          this.presentToast('Akun Penjual / Admin tidak dapat berbelanja', 'warning', 'lock-closed-outline');
+        } else {
+          this.presentToast('Gagal menambahkan ke keranjang', 'danger', 'alert-circle-outline'); 
+        }
+      }
     });
   }
 
@@ -973,7 +980,14 @@ export class ProductDetailPage implements OnInit {
           this.router.navigate(['/checkout']);
         }
       },
-      error: () => { this.isAdding = false; this.presentToast('Gagal memproses pembelian', 'danger', 'alert-circle-outline'); }
+      error: (err) => { 
+        this.isAdding = false; 
+        if (err.status === 403) {
+          this.presentToast('Akun Penjual / Admin tidak dapat berbelanja', 'warning', 'lock-closed-outline');
+        } else {
+          this.presentToast('Gagal memproses pembelian', 'danger', 'alert-circle-outline'); 
+        }
+      }
     });
   }
 

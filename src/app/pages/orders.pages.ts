@@ -9,13 +9,8 @@ import { ProductService } from '../services/product.service';
   selector: 'app-orders',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary" style="--padding-top: 8px; --padding-bottom: 8px;">
-        <ion-buttons slot="start">
-          <ion-button (click)="goBack()" fill="clear" color="dark">
-            <ion-icon name="arrow-back-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-        <ion-title class="zeven-heading" style="font-weight: 800; color: #114232;">Pesanan Saya</ion-title>
+      <ion-toolbar style="--background: #114232; --padding-top: 8px; --padding-bottom: 8px;">
+        <ion-title class="zeven-heading" style="font-weight: 800; color: #ffffff;">Pesanan Saya</ion-title>
       </ion-toolbar>
       <ion-toolbar color="tertiary">
         <ion-segment [(ngModel)]="activeSegment" (ionChange)="onSegmentChange()" color="primary" mode="md" class="custom-segment">
