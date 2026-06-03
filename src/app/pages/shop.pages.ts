@@ -1463,29 +1463,10 @@ export class CheckoutPage implements OnInit {
     this.orderService.checkout(this.shippingAddress, this.voucherCode, cartItemIds).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (res && res.order && res.order.snap_token) {
-          (window as any).snap.pay(res.order.snap_token, {
-            onSuccess: (result: any) => {
-              this.presentToast('Pembayaran Berhasil!', 'success');
-              this.router.navigate(['/tabs/history']);
-            },
-            onPending: (result: any) => {
-              this.presentToast('Menunggu pembayaran diselesaikan', 'warning');
-              this.router.navigate(['/order-tracking', { id: res.order.id }]);
-            },
-            onError: (result: any) => {
-              this.presentToast('Pembayaran gagal', 'danger');
-              this.router.navigate(['/order-tracking', { id: res.order.id }]);
-            },
-            onClose: () => {
-              this.presentToast('Anda menutup pop-up pembayaran sebelum menyelesaikannya', 'warning');
-              this.router.navigate(['/order-tracking', { id: res.order.id }]);
-            }
-          });
-        } else if (res && res.order && res.order.id) {
+        if (res && res.order && res.order.id) {
           this.showSuccessAlert(res.order.id, res.order.final_price);
         } else {
-          this.presentToast('Pesanan Berhasil!', 'success');
+          this.presentToast('Pesanan Berhasil Dibuat!', 'success');
           this.router.navigate(['/tabs/history']);
         }
       },

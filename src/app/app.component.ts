@@ -27,7 +27,7 @@ export class AppComponent {
       // Mengubah warna Status Bar HP (Baterai, Jam) menjadi hijau khas Zeven
       if (this.platform.is('capacitor')) {
         try {
-          await StatusBar.setBackgroundColor({ color: '#114232' });
+          await StatusBar.setOverlaysWebView({ overlay: true });
           await StatusBar.setStyle({ style: Style.Dark });
         } catch (e) {
           console.warn('StatusBar plugin not available', e);

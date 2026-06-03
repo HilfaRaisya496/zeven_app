@@ -141,18 +141,8 @@ import { AddressService } from '../services/address.service';
           <!-- If Payment Status is Pending or Failed (or no transaction yet) -->
           <div *ngIf="!order.transaction || order.transaction.payment_status === 'pending' || order.transaction.payment_status === 'failed'">
             
-            <!-- MIDTRANS RE-PAY BUTTON -->
-            <div *ngIf="order.snap_token" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed #ccc;">
-              <p style="font-size: 13px; color: #114232; margin-bottom: 12px; font-weight: 600; text-align: center;">
-                Belum menyelesaikan pembayaran otomatis?
-              </p>
-              <ion-button expand="block" class="zeven-gradient-btn" (click)="payWithMidtrans()" style="--background: linear-gradient(135deg, #114232 0%, #295546 100%);">
-                <ion-icon name="card-outline" slot="start"></ion-icon>
-                Buka Pembayaran Otomatis
-              </ion-button>
-            </div>
-            
-            <p style="font-size: 13px; color: #666; margin-bottom: 12px; font-weight: bold; text-align: center;">ATAU CARA MANUAL:</p>
+
+            <p style="font-size: 13px; color: #666; margin-bottom: 12px; font-weight: bold; text-align: center;">UPLOAD BUKTI TRANSFER:</p>
             <div style="background: #fff5f5; border: 1px solid #ffd8d8; border-radius: 8px; padding: 12px; margin-bottom: 16px;" *ngIf="order.transaction?.payment_status === 'failed'">
               <p style="margin: 0; font-size: 12px; color: #c0392b; font-weight: 600;">
                 ❌ Pembayaran ditolak oleh Admin. Silakan transfer ulang ke rekening di atas dan unggah bukti transfer yang valid.
@@ -324,25 +314,6 @@ export class OrderTrackingPage implements OnInit {
         this.isUploading = false;
         console.error(err);
         this.presentToast(err.error?.message || 'Gagal mengirimkan bukti pembayaran');
-      }
-    });
-  }
-
-  payWithMidtrans() {
-    if (!this.order || !this.order.snap_token) return;
-    (window as any).snap.pay(this.order.snap_token, {
-      onSuccess: (result: any) => {
-        this.presentToast('Pembayaran Berhasil!');
-        this.fetchOrderDetails(this.order.id);
-      },
-      onPending: (result: any) => {
-        this.presentToast('Menunggu pembayaran diselesaikan');
-      },
-      onError: (result: any) => {
-        this.presentToast('Pembayaran gagal');
-      },
-      onClose: () => {
-        this.presentToast('Anda menutup pop-up pembayaran sebelum menyelesaikannya');
       }
     });
   }

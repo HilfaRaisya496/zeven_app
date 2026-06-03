@@ -177,7 +177,7 @@ register();
               <p>Kami mengumpulkan data pribadi Anda (seperti nama, email, dan alamat pengiriman) hanya untuk keperluan pemrosesan pesanan dan peningkatan layanan. Data Anda dienkripsi dan disimpan dengan aman.</p>
               
               <h3>3. Pembayaran & Transaksi</h3>
-              <p>Semua transaksi pembayaran diproses melalui gateway pembayaran resmi (Midtrans) yang dijamin keamanannya. Kami tidak menyimpan detail kartu kredit/debit Anda di server kami.</p>
+              <p>Saat ini seluruh transaksi pembayaran di Zeven dilakukan secara <b>Transfer Manual</b> langsung ke rekening resmi kami. Anda diwajibkan untuk mengunggah bukti transfer yang sah dan jelas. Kami akan memverifikasi setiap pembayaran secara manual sebelum pesanan diteruskan ke penjual.</p>
               
               <h3>4. Kebijakan Pemesanan</h3>
               <p>Pesanan yang telah berhasil dibayar akan langsung diteruskan ke penjual. Harap pastikan kembali detail pesanan Anda sebelum melakukan pembayaran akhir.</p>
