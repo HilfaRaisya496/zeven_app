@@ -181,7 +181,7 @@ export class FilterModalComponent implements OnInit {
 
         <ion-grid class="ion-no-padding" *ngIf="!isLoading">
           <ion-row>
-            <ion-col size="6" *ngFor="let product of products" class="ion-padding-tiny">
+            <ion-col size="6" *ngFor="let product of products; trackBy: trackById" class="ion-padding-tiny">
               <div class="zeven-product-card" (click)="goToDetail(product.id)">
                 <div class="img-container">
                   <img [src]="productService.storageUrl + product.image" 
@@ -336,6 +336,7 @@ export class HomePage implements OnInit {
   unreadChatCount: number = 0;
   private chatPollingTimer: any;
   Number = Number;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,
@@ -486,7 +487,7 @@ export class HomePage implements OnInit {
             {{ activeSlideIndex + 1 }}/{{ product.images.length }}
           </div>
           <swiper-container #swiper pagination="true" zoom="true" *ngIf="product.images?.length > 0">
-            <swiper-slide *ngFor="let img of product.images">
+            <swiper-slide *ngFor="let img of product.images; trackBy: trackById">
               <img [src]="img.image_url" 
                    onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600'">
             </swiper-slide>
@@ -570,7 +571,7 @@ export class HomePage implements OnInit {
                   </div>
                 </div>
                 <div class="rating-bars">
-                  <div class="bar-row" *ngFor="let b of ratingBars">
+                  <div class="bar-row" *ngFor="let b of ratingBars; trackBy: trackById">
                     <span class="bar-label">{{ b.star }}★</span>
                     <div class="bar-track"><div class="bar-fill" [style.width.%]="b.pct"></div></div>
                     <span class="bar-count">{{ b.count }}</span>
@@ -592,7 +593,7 @@ export class HomePage implements OnInit {
 
               <!-- Review List -->
               <div class="review-list" *ngIf="!isLoadingReviews">
-                <div class="review-card" *ngFor="let rv of reviews.slice(0, showAllReviews ? 999 : 3)">
+                <div class="review-card" *ngFor="let rv of reviews.slice(0, showAllReviews ? 999 : 3); trackBy: trackById">
                   <div class="rv-header">
                     <div class="rv-avatar">{{ rv.buyer?.name?.charAt(0) || 'P' }}</div>
                     <div class="rv-meta">
@@ -837,6 +838,7 @@ export class ProductDetailPage implements OnInit {
   ratingBars: { star: number, count: number, pct: number }[] = [];
   isLoadingReviews = false;
   showAllReviews = false;
+  trackById(index: number, item: any) { return item?.id || item?.star || index; }
 
   constructor(
     private router: Router,
@@ -1021,7 +1023,7 @@ export class ProductDetailPage implements OnInit {
 
       <!-- Cart Items -->
       <div *ngIf="!isLoading && cart?.items?.length > 0">
-        <div class="cart-item-premium" *ngFor="let item of cart?.items">
+        <div class="cart-item-premium" *ngFor="let item of cart?.items; trackBy: trackById">
           <ion-checkbox color="secondary" [(ngModel)]="item.selected" class="custom-checkbox"></ion-checkbox>
           <div class="product-thumb">
             <img [src]="productService.storageUrl + item.product.image"
@@ -1133,6 +1135,7 @@ export class CartPage implements OnInit {
   appliedVoucher: any = null;
   discountAmount: number = 0;
   Number = Number;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(private router: Router, private cartService: CartService, private orderService: OrderService, public productService: ProductService, private toastCtrl: ToastController) { }
   ngOnInit() { }
@@ -1261,7 +1264,7 @@ export class CartPage implements OnInit {
            <ion-icon name="bag-handle-outline" color="secondary"></ion-icon>
            <h3>Pesanan Kamu</h3>
         </div>
-        <div class="checkout-item-row" *ngFor="let item of filteredItems">
+        <div class="checkout-item-row" *ngFor="let item of filteredItems; trackBy: trackById">
           <img [src]="productService.storageUrl + item.product.image" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=100'">
           <div class="item-meta">
             <h4>{{ item.product.name }}</h4>
@@ -1369,6 +1372,7 @@ export class CheckoutPage implements OnInit {
   appliedVoucher: any = null;
   discountAmount: number = 0;
   Number = Number;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router, 

@@ -88,7 +88,7 @@ import { AddressService } from '../services/address.service';
 
         <div class="delivery-info">
           <h3>Rincian Pembelian</h3>
-          <div class="courier" *ngFor="let item of order.items">
+          <div class="courier" *ngFor="let item of order.items; trackBy: trackById">
             <img [src]="productService.storageUrl + item.product?.image" 
                  onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=100'"
                  style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">
@@ -264,6 +264,7 @@ export class OrderTrackingPage implements OnInit {
   isUploading = false;
   isConfirming = false;
   isExtending = false;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,
@@ -450,7 +451,7 @@ export class OrderTrackingPage implements OnInit {
       </div>
 
       <ion-list lines="full" *ngIf="!isLoading && chats.length > 0">
-        <ion-item-sliding *ngFor="let chat of chats">
+        <ion-item-sliding *ngFor="let chat of chats; trackBy: trackById">
           <ion-item button (click)="goToChat(chat.id, chat.name, chat.avatar)" class="chat-item">
             <div slot="start" class="chat-avatar">
               <img [src]="authService.getProfileImage(chat.avatar, chat.name)" 
@@ -507,6 +508,7 @@ export class ChatListPage implements OnInit, OnDestroy {
   isLoading = false;
   polling: any;
   currentUserId: number | null = null;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,
@@ -632,7 +634,7 @@ export class ChatListPage implements OnInit, OnDestroy {
       <div class="chat-messages">
         <div class="chat-date" *ngIf="messages.length > 0">Percakapan Dimulai</div>
         
-        <div *ngFor="let msg of messages" class="message" [ngClass]="{'sent': msg.sender_id === currentUserId, 'received': msg.sender_id !== currentUserId}">
+        <div *ngFor="let msg of messages; trackBy: trackById" class="message" [ngClass]="{'sent': msg.sender_id === currentUserId, 'received': msg.sender_id !== currentUserId}">
           <div class="bubble" (click)="msg.sender_id === currentUserId && canEdit(msg) ? showMessageOptions(msg) : null" [class.clickable]="msg.sender_id === currentUserId && canEdit(msg)">
             {{ msg.message }}
           </div>
@@ -694,6 +696,7 @@ export class ChatPage implements OnInit, OnDestroy {
   currentUserId: number | null = null;
   polling: any;
   @ViewChild('chatContent') content!: IonContent;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,
@@ -909,7 +912,7 @@ export class ChatPage implements OnInit, OnDestroy {
         <p>Belum ada transaksi</p>
       </div>
 
-      <div class="history-card" *ngFor="let order of filteredOrders">
+      <div class="history-card" *ngFor="let order of filteredOrders; trackBy: trackById">
         <div class="card-header">
           <div class="seller-info">
             <ion-icon name="storefront"></ion-icon>
@@ -918,7 +921,7 @@ export class ChatPage implements OnInit, OnDestroy {
           <span class="status" [ngClass]="order.status">{{ order.status | uppercase }}</span>
         </div>
         
-        <div *ngFor="let item of order.items" class="item-wrap">
+        <div *ngFor="let item of order.items; trackBy: trackById" class="item-wrap">
           <div class="card-body" (click)="goToTracking(order.id)">
             <img [src]="productService.storageUrl + item.product?.image" 
                  onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=100'">
@@ -992,6 +995,7 @@ export class TransactionHistoryPage {
   selectedTab = 'all';
   isLoading = false;
   Number = Number;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,
@@ -1309,7 +1313,7 @@ export class ReviewRatingPage implements OnInit {
 
       <div class="stats-row">
         <div class="stat-item" (click)="goToOrders()" style="cursor: pointer;">
-          <h3>12</h3>
+          <h3>{{ orderCount }}</h3>
           <span>Pesanan Saya</span>
         </div>
         <div class="divider-v"></div>
@@ -1368,7 +1372,7 @@ export class ReviewRatingPage implements OnInit {
 
         <!-- Voucher List - scrollable -->
         <div class="voucher-list" *ngIf="vouchers.length > 0">
-          <div class="voucher-card" *ngFor="let v of vouchers">
+          <div class="voucher-card" *ngFor="let v of vouchers; trackBy: trackById">
             <div class="voucher-left">
               <ion-icon name="ticket"></ion-icon>
             </div>
@@ -1456,10 +1460,12 @@ export class ReviewRatingPage implements OnInit {
 })
 export class ProfilePage implements OnInit {
   user: any;
+  orderCount: number = 0;
   wishlistCount: number = 0;
   voucherCount: number = 0;
   vouchers: any[] = [];
   voucherSheetOpen: boolean = false;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,
@@ -1476,8 +1482,16 @@ export class ProfilePage implements OnInit {
     this.user = this.authService.getCurrentUser();
     this.authService.getCurrentUser$().subscribe(user => {
       this.user = user;
+      this.fetchOrderCount();
       this.fetchWishlistCount();
       this.fetchActiveVouchers();
+    });
+  }
+
+  fetchOrderCount() {
+    this.orderService.getMyOrders().subscribe({
+      next: (res) => this.orderCount = res ? res.length : 0,
+      error: () => this.orderCount = 0
     });
   }
 
@@ -1830,7 +1844,7 @@ export class EditProfilePage implements OnInit {
       </div>
 
       <div class="address-grid" *ngIf="!isLoading && addresses.length > 0">
-        <div class="address-card" *ngFor="let addr of addresses" [class.main]="addr.is_main">
+        <div class="address-card" *ngFor="let addr of addresses; trackBy: trackById" [class.main]="addr.is_main">
           <div class="card-header">
             <div class="label-badge">{{ addr.label }}</div>
             <div class="main-badge" *ngIf="addr.is_main">Utama</div>
@@ -1889,6 +1903,7 @@ export class EditProfilePage implements OnInit {
 export class AddressListPage implements OnInit {
   addresses: any[] = [];
   isLoading = false;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private router: Router,

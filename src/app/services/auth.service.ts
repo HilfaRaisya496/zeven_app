@@ -82,12 +82,16 @@ export class AuthService {
   logout(): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/logout`, {}, { headers: this.getHeaders() }).pipe(
       tap(() => {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('current_user');
-        this.authToken$.next(null);
-        this.currentUser$.next(null);
+        this.clearAuthData();
       })
     );
+  }
+
+  clearAuthData(): void {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('current_user');
+    this.authToken$.next(null);
+    this.currentUser$.next(null);
   }
 
   getToken(): string | null {

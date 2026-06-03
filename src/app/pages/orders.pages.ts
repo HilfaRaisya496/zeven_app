@@ -45,7 +45,7 @@ import { ProductService } from '../services/product.service';
       </div>
 
       <!-- Order Cards -->
-      <div class="order-card-premium" *ngFor="let order of filteredOrders">
+      <div class="order-card-premium" *ngFor="let order of filteredOrders; trackBy: trackById">
         <div class="order-main-click" (click)="goToTracking(order.id)">
           <div class="order-top-row">
             <div class="seller-preview">
@@ -137,6 +137,7 @@ export class OrdersPage implements OnInit {
   activeSegment: string = 'pending';
   isLoading = false;
   Number = Number;
+  trackById(index: number, item: any) { return item?.id || index; }
 
   constructor(
     private orderService: OrderService,
