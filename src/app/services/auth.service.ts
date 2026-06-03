@@ -118,6 +118,15 @@ export class AuthService {
     return this.authToken$.pipe(map(token => !!token));
   }
 
+  getUserProfile(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/user`, { headers: this.getHeaders() }).pipe(
+      tap((user) => {
+        localStorage.setItem('current_user', JSON.stringify(user));
+        this.currentUser$.next(user);
+      })
+    );
+  }
+
   updateProfile(data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/profile`, data, { headers: this.getHeaders() }).pipe(
       tap((response: any) => {

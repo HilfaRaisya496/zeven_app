@@ -29,6 +29,10 @@ export class AppComponent {
         try {
           await StatusBar.setOverlaysWebView({ overlay: true });
           await StatusBar.setStyle({ style: Style.Dark });
+          
+          if (this.platform.is('android')) {
+            document.documentElement.classList.add('plt-android-overlay');
+          }
         } catch (e) {
           console.warn('StatusBar plugin not available', e);
         }

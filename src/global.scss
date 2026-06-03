@@ -62,10 +62,13 @@ body {
 
 .zeven-gradient-btn {
   --background: linear-gradient(135deg, #114232 0%, #295546 100%);
-  --border-radius: 12px;
-  --box-shadow: 0 4px 14px rgba(17, 66, 50, 0.3);
-  font-weight: 600;
+  --border-radius: 14px;
+  --box-shadow: 0 6px 18px rgba(17, 66, 50, 0.25);
+  font-weight: 700;
   letter-spacing: 0.5px;
+  text-transform: none !important;
+  height: 48px;
+  font-size: 15px;
 }
 
 .zeven-input {
@@ -153,9 +156,25 @@ ion-tab-button {
   overflow: visible !important;
 }
 
-/* Fix iOS safe area for headers if needed */
+/* Fix safe area for headers on iOS and Android */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+}
+
+.plt-android.plt-capacitor,
+.plt-android-overlay,
+html.plt-android.plt-capacitor,
+:root.plt-android-overlay {
+  --safe-area-top: 24px !important;
+}
+
 ion-header {
-  padding-top: env(safe-area-inset-top);
+  padding-top: 0 !important;
+}
+
+ion-header ion-toolbar:first-child {
+  --padding-top: calc(4px + var(--safe-area-top, 0px)) !important;
+  --padding-bottom: 8px !important;
 }
 
 .zeven-bg {

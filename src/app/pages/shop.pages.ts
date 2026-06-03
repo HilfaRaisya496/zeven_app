@@ -107,7 +107,7 @@ export class FilterModalComponent implements OnInit {
   selector: 'app-home',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar style="--background: #114232; --padding-top: 4px; --padding-bottom: 4px;">
+      <ion-toolbar style="--background: #114232;">
         <div class="header-row">
           <div class="logo-small">
             <span class="z">Z</span><span class="seven">7</span>
@@ -140,7 +140,7 @@ export class FilterModalComponent implements OnInit {
         <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
       </ion-refresher>
 
-      <div class="ion-padding-horizontal">
+      <div class="ion-padding-horizontal" style="padding-top: 16px;">
         <!-- Discovery Section (Only show when not searching) -->
         <ng-container *ngIf="!searchQuery">
           <ion-grid class="ion-no-padding">
@@ -214,19 +214,20 @@ export class FilterModalComponent implements OnInit {
   `,
   styles: [`
     .logo-small { 
-      font-size: 24px; 
+      font-size: 26px; 
       font-weight: 800; 
       display: flex;
       align-items: center;
+      letter-spacing: -0.5px;
     }
     .header-row {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       justify-content: space-between !important;
-      gap: 8px;
+      gap: 10px;
       width: 100% !important;
-      padding: 0 8px;
+      padding: 0 4px;
     }
     .z { color: #ffffff; }
     .seven { color: var(--ion-color-secondary); }
@@ -234,14 +235,23 @@ export class FilterModalComponent implements OnInit {
     .search-bar { 
       flex: 1 !important; 
       min-width: 0 !important; 
-      background: #fff; 
-      border-radius: 12px; 
-      padding: 4px 10px; 
+      background: #ffffff; 
+      border-radius: 14px; 
+      padding: 6px 12px; 
       display: flex; 
       align-items: center; 
-      gap: 6px; 
-      border: 1px solid #eee; 
-      height: 36px;
+      gap: 8px; 
+      border: none; 
+      height: 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+    .search-bar:focus-within {
+      box-shadow: 0 4px 16px rgba(198, 142, 23, 0.15);
+    }
+    .search-bar ion-icon[name="search-outline"] {
+      color: #114232;
+      font-size: 18px;
     }
     .filter-mini-btn {
       --padding-start: 4px; --padding-end: 4px;
@@ -253,20 +263,28 @@ export class FilterModalComponent implements OnInit {
       border: none; 
       outline: none; 
       flex: 1; 
-      font-size: 13px; 
+      font-size: 14px; 
       background: transparent;
       width: 100%;
+      color: #333;
+    }
+    .search-bar input::placeholder {
+      color: #999;
     }
     .header-actions { 
       display: flex; 
-      gap: 0; 
+      gap: 2px; 
       flex-shrink: 0;
     }
     .header-icon-btn { 
       --padding-start: 4px; 
       --padding-end: 4px; 
       margin: 0; 
-      height: 38px;
+      height: 40px;
+      transition: transform 0.2s ease;
+    }
+    .header-icon-btn:active {
+      transform: scale(0.92);
     }
     .badge-overlay { 
       position: absolute; 
@@ -387,16 +405,16 @@ export class HomePage implements OnInit {
   }
 
   doRefresh(event: any) {
-    this.fetchProducts();
+    this.fetchCategories();
+    this.fetchProducts(true, event);
     this.fetchUnreadCount();
     this.fetchCartCount();
-    setTimeout(() => {
-      event.target.complete();
-    }, 1000);
   }
 
-  fetchProducts() {
-    this.isLoading = true;
+  fetchProducts(isRefresh = false, event: any = null) {
+    if (!isRefresh) {
+      this.isLoading = true;
+    }
     const params = {
       search: this.searchQuery,
       category: this.selectedCategory,
@@ -406,8 +424,16 @@ export class HomePage implements OnInit {
     };
 
     this.productService.getProducts(params).subscribe({
-      next: (res) => { this.products = res.data || []; this.isLoading = false; },
-      error: (err) => { console.error(err); this.isLoading = false; }
+      next: (res) => {
+        this.products = res.data || [];
+        this.isLoading = false;
+        if (event) event.target.complete();
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading = false;
+        if (event) event.target.complete();
+      }
     });
   }
 
@@ -1009,13 +1035,13 @@ export class ProductDetailPage implements OnInit {
   selector: 'app-cart',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary" style="--padding-top: 8px; --padding-bottom: 8px;">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
-          <ion-button (click)="goBack()" fill="clear" color="dark">
+          <ion-button (click)="goBack()" fill="clear" style="color: white;">
             <ion-icon name="arrow-back-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="font-weight: 800; color: #114232;">Keranjang Saya</ion-title>
+        <ion-title class="zeven-heading" style="font-weight: 800; color: white;">Keranjang Saya</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -1155,22 +1181,25 @@ export class CartPage implements OnInit {
   ngOnInit() { }
   ionViewWillEnter() { this.fetchCart(); }
   doRefresh(event: any) {
-    this.fetchCart();
-    setTimeout(() => {
-      event.target.complete();
-    }, 1000);
+    this.fetchCart(true, event);
   }
 
-  fetchCart() {
-    this.isLoading = true;
+  fetchCart(isRefresh = false, event: any = null) {
+    if (!isRefresh) {
+      this.isLoading = true;
+    }
     this.cartService.getCart().subscribe({
       next: (res) => {
         this.cart = res;
         if (this.cart?.items) this.cart.items.forEach((item: any) => item.selected = true);
         this.isLoading = false;
         if (this.appliedVoucher) this.applyVoucher();
+        if (event) event.target.complete();
       },
-      error: () => this.isLoading = false
+      error: () => {
+        this.isLoading = false;
+        if (event) event.target.complete();
+      }
     });
   }
 
@@ -1239,13 +1268,13 @@ export class CartPage implements OnInit {
   selector: 'app-checkout',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary" style="--padding-top: 8px; --padding-bottom: 8px;">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
-          <ion-button (click)="goBack()" fill="clear" color="dark">
+          <ion-button (click)="goBack()" fill="clear" style="color: white;">
             <ion-icon name="arrow-back-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="font-weight: 800; color: #114232;">Konfirmasi Pesanan</ion-title>
+        <ion-title class="zeven-heading" style="font-weight: 800; color: white;">Konfirmasi Pesanan</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -1504,15 +1533,19 @@ export class CheckoutPage implements OnInit {
   selector: 'app-wishlist',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary" style="--padding-top: 8px; --padding-bottom: 8px;">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
-          <ion-back-button defaultHref="/tabs/profile" color="dark"></ion-back-button>
+          <ion-back-button defaultHref="/tabs/profile" style="color: white; --color: white;"></ion-back-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="font-weight: 800; color: #114232;">Favorit Saya</ion-title>
+        <ion-title class="zeven-heading" style="font-weight: 800; color: white;">Favorit Saya</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="zeven-bg">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
+      </ion-refresher>
+
       <div *ngIf="isLoading" class="ion-text-center ion-padding" style="margin-top: 40px;">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
       </div>
@@ -1607,6 +1640,17 @@ export class WishlistPage implements OnInit {
   products: any[] = [];
   isLoading = false;
   Number = Number;
+
+  doRefresh(event: any) {
+    this.productService.getWishlist().subscribe({
+      next: (res) => {
+        this.products = res;
+        event.target.complete();
+      },
+      error: () => event.target.complete()
+    });
+  }
+
   constructor(
     private router: Router,
     public productService: ProductService,

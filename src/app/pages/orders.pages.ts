@@ -9,7 +9,7 @@ import { ProductService } from '../services/product.service';
   selector: 'app-orders',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar style="--background: #114232; --padding-top: 8px; --padding-bottom: 8px;">
+      <ion-toolbar style="--background: #114232;">
         <ion-title class="zeven-heading" style="font-weight: 800; color: #ffffff;">Pesanan Saya</ion-title>
       </ion-toolbar>
       <ion-toolbar color="tertiary">
@@ -25,6 +25,10 @@ import { ProductService } from '../services/product.service';
     </ion-header>
 
     <ion-content class="zeven-bg ion-padding">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
+      </ion-refresher>
+
       <div *ngIf="isLoading" class="ion-text-center ion-padding">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
       </div>
@@ -133,6 +137,20 @@ export class OrdersPage implements OnInit {
   isLoading = false;
   Number = Number;
   trackById(index: number, item: any) { return item?.id || index; }
+
+  doRefresh(event: any) {
+    this.orderService.getMyOrders().subscribe({
+      next: (res) => {
+        this.orders = res;
+        this.filterOrders();
+        event.target.complete();
+      },
+      error: (err) => {
+        console.error(err);
+        event.target.complete();
+      }
+    });
+  }
 
   constructor(
     private orderService: OrderService,

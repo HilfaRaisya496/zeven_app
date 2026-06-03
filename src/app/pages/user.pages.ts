@@ -13,16 +13,20 @@ import { AddressService } from '../services/address.service';
   selector: 'app-order-tracking',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
-          <ion-back-button defaultHref="/tabs/history" color="dark"></ion-back-button>
+          <ion-back-button defaultHref="/tabs/history" style="color: white; --color: white;"></ion-back-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="text-align: center;">Status Pesanan</ion-title>
+        <ion-title class="zeven-heading" style="text-align: center; color: white;">Status Pesanan</ion-title>
         <div slot="end" style="width: 48px;"></div>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="zeven-bg ion-padding">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
+      </ion-refresher>
+
       <div *ngIf="isLoading" class="ion-text-center ion-padding">
         <ion-spinner color="primary"></ion-spinner>
       </div>
@@ -126,15 +130,15 @@ import { AddressService } from '../services/address.service';
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <span style="font-size: 13px; color: #555;">No. Rekening:</span>
               <span style="display: flex; align-items: center; gap: 6px;">
-                <strong style="font-size: 15px; color: #114232;">772-0988-123</strong>
-                <ion-button fill="clear" size="small" style="--padding-start: 4px; --padding-end: 4px; height: 20px; margin: 0;" (click)="copyText('7720988123')">
+                <strong style="font-size: 15px; color: #114232;">704-5359-786</strong>
+                <ion-button fill="clear" size="small" style="--padding-start: 4px; --padding-end: 4px; height: 20px; margin: 0;" (click)="copyText('7045359786')">
                   <ion-icon slot="icon-only" name="copy-outline" style="font-size: 14px;" color="secondary"></ion-icon>
                 </ion-button>
               </span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; color: #555;">Atas Nama:</span>
-              <strong style="font-size: 13px; color: #114232;">PT ZEVEN MARKETPLACE INDONESIA</strong>
+              <strong style="font-size: 13px; color: #114232;">HILFA RAISYA EKSA PUTRA</strong>
             </div>
           </div>
 
@@ -247,6 +251,7 @@ import { AddressService } from '../services/address.service';
 })
 export class OrderTrackingPage implements OnInit {
   order: any;
+  orderId: number | null = null;
   isLoading = false;
   Number = Number;
   selectedFile: File | null = null;
@@ -255,6 +260,23 @@ export class OrderTrackingPage implements OnInit {
   isConfirming = false;
   isExtending = false;
   trackById(index: number, item: any) { return item?.id || index; }
+
+  doRefresh(event: any) {
+    if (this.orderId) {
+      this.orderService.getOrderDetails(this.orderId).subscribe({
+        next: (res) => {
+          this.order = res;
+          event.target.complete();
+        },
+        error: (err) => {
+          console.error(err);
+          event.target.complete();
+        }
+      });
+    } else {
+      event.target.complete();
+    }
+  }
 
   constructor(
     private router: Router,
@@ -268,7 +290,8 @@ export class OrderTrackingPage implements OnInit {
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.fetchOrderDetails(parseInt(id));
+      this.orderId = parseInt(id);
+      this.fetchOrderDetails(this.orderId);
     }
   }
 
@@ -404,12 +427,16 @@ export class OrderTrackingPage implements OnInit {
   selector: 'app-chat-list',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
-        <ion-title class="zeven-heading">Kotak Masuk</ion-title>
+      <ion-toolbar style="--background: #114232;">
+        <ion-title class="zeven-heading" style="color: white;">Kotak Masuk</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="zeven-bg">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
+      </ion-refresher>
+
       <div *ngIf="isLoading" class="ion-text-center ion-padding">
         <ion-spinner color="primary"></ion-spinner>
       </div>
@@ -480,6 +507,33 @@ export class ChatListPage implements OnInit, OnDestroy {
   polling: any;
   currentUserId: number | null = null;
   trackById(index: number, item: any) { return item?.id || index; }
+
+  doRefresh(event: any) {
+    this.chatService.getChatList().subscribe({
+      next: (res) => {
+        const hiddenMap = JSON.parse(localStorage.getItem('zeven_hidden_chats_v2') || '{}');
+        let mapsChanged = false;
+
+        this.chats = res.filter((c: any) => {
+          if (hiddenMap[c.id]) {
+            if (c.unread_count > 0 || c.last_message !== hiddenMap[c.id].lastText) {
+              delete hiddenMap[c.id];
+              mapsChanged = true;
+              return true;
+            }
+            return false;
+          }
+          return true;
+        });
+
+        if (mapsChanged) {
+          localStorage.setItem('zeven_hidden_chats_v2', JSON.stringify(hiddenMap));
+        }
+        event.target.complete();
+      },
+      error: () => event.target.complete()
+    });
+  }
 
   constructor(
     private router: Router,
@@ -581,10 +635,10 @@ export class ChatListPage implements OnInit, OnDestroy {
   selector: 'app-chat',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
           <ion-button (click)="goBack()">
-            <ion-icon name="arrow-back-outline" color="dark"></ion-icon>
+            <ion-icon name="arrow-back-outline" style="color: white; --color: white;"></ion-icon>
           </ion-button>
         </ion-buttons>
         <div class="chat-header-title">
@@ -594,8 +648,8 @@ export class ChatListPage implements OnInit, OnDestroy {
                  style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
           </div>
           <div class="info">
-            <h4>{{ receiverName }}</h4>
-            <span>Online</span>
+            <h4 style="color: white;">{{ receiverName }}</h4>
+            <span style="color: #a3e635;">Online</span>
           </div>
         </div>
       </ion-toolbar>
@@ -632,9 +686,9 @@ export class ChatListPage implements OnInit, OnDestroy {
   `,
   styles: [`
     .chat-header-title { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--ion-color-primary); color: white; display: flex; justify-content: center; align-items: center; font-weight: 700; }
-    .info h4 { margin: 0; font-size: 15px; font-weight: 600; }
-    .info span { font-size: 11px; color: var(--ion-color-success); font-weight: 500; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: white; color: #114232; display: flex; justify-content: center; align-items: center; font-weight: 700; overflow: hidden; }
+    .info h4 { margin: 0; font-size: 15px; font-weight: 600; color: white; }
+    .info span { font-size: 11px; color: #a3e635; font-weight: 500; }
     
     .chat-date { text-align: center; font-size: 12px; color: var(--ion-color-medium); margin: 16px 0; }
     
@@ -858,8 +912,8 @@ export class ChatPage implements OnInit, OnDestroy {
   selector: 'app-transaction-history',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
-        <ion-title class="zeven-heading">Transaksi</ion-title>
+      <ion-toolbar style="--background: #114232;">
+        <ion-title class="zeven-heading" style="color: white;">Transaksi</ion-title>
       </ion-toolbar>
       <ion-toolbar color="tertiary">
         <div class="tabs">
@@ -980,10 +1034,7 @@ export class TransactionHistoryPage {
   ionViewWillEnter() { this.fetchOrders(); }
   
   doRefresh(event: any) {
-    this.fetchOrders();
-    setTimeout(() => {
-      event.target.complete();
-    }, 1000);
+    this.fetchOrders(true, event);
   }
 
   setTab(tab: string) { this.selectedTab = tab; }
@@ -994,11 +1045,20 @@ export class TransactionHistoryPage {
     return this.orders.filter(o => o.status === 'completed');
   }
 
-  fetchOrders() {
-    this.isLoading = true;
+  fetchOrders(isRefresh = false, event: any = null) {
+    if (!isRefresh) {
+      this.isLoading = true;
+    }
     this.orderService.getMyOrders().subscribe({
-      next: (res) => { this.orders = res; this.isLoading = false; },
-      error: () => this.isLoading = false
+      next: (res) => {
+        this.orders = res;
+        this.isLoading = false;
+        if (event) event.target.complete();
+      },
+      error: () => {
+        this.isLoading = false;
+        if (event) event.target.complete();
+      }
     });
   }
 
@@ -1012,13 +1072,13 @@ export class TransactionHistoryPage {
   selector: 'app-review-rating',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
           <ion-button (click)="goBack()">
-            <ion-icon name="arrow-back-outline" color="dark"></ion-icon>
+            <ion-icon name="arrow-back-outline" style="color: white; --color: white;"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="text-align: center;">Tulis Ulasan</ion-title>
+        <ion-title class="zeven-heading" style="text-align: center; color: white;">Tulis Ulasan</ion-title>
         <div slot="end" style="width: 48px;"></div>
       </ion-toolbar>
     </ion-header>
@@ -1260,6 +1320,10 @@ export class ReviewRatingPage implements OnInit {
   selector: 'app-profile',
   template: `
     <ion-content class="zeven-bg">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
+      </ion-refresher>
+
       <div class="profile-header">
         <div class="header-top">
           <h1 class="zeven-heading" style="color: white;">Profil</h1>
@@ -1369,7 +1433,7 @@ export class ReviewRatingPage implements OnInit {
     </ion-content>
   `,
   styles: [`
-    .profile-header { background: linear-gradient(135deg, #114232 0%, #295546 100%); padding: 40px 24px 60px; border-radius: 0 0 32px 32px; position: relative; }
+    .profile-header { background: linear-gradient(135deg, #114232 0%, #295546 100%); padding: calc(24px + var(--safe-area-top, 0px)) 24px 60px; border-radius: 0 0 32px 32px; position: relative; }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .settings-icon { font-size: 24px; color: white; }
     
@@ -1437,6 +1501,59 @@ export class ProfilePage implements OnInit {
   vouchers: any[] = [];
   voucherSheetOpen: boolean = false;
   trackById(index: number, item: any) { return item?.id || index; }
+
+  doRefresh(event: any) {
+    let completedCount = 0;
+    const checkComplete = () => {
+      completedCount++;
+      if (completedCount === 4) {
+        event.target.complete();
+      }
+    };
+
+    this.authService.getUserProfile().subscribe({
+      next: (user) => {
+        this.user = user;
+        checkComplete();
+      },
+      error: () => checkComplete()
+    });
+
+    this.orderService.getMyOrders().subscribe({
+      next: (res) => {
+        this.orderCount = res ? res.length : 0;
+        checkComplete();
+      },
+      error: () => {
+        this.orderCount = 0;
+        checkComplete();
+      }
+    });
+
+    this.productService.getWishlist().subscribe({
+      next: (res) => {
+        this.wishlistCount = res.length;
+        checkComplete();
+      },
+      error: () => {
+        this.wishlistCount = 0;
+        checkComplete();
+      }
+    });
+
+    this.orderService.getActiveVouchers().subscribe({
+      next: (res) => {
+        this.vouchers = res || [];
+        this.voucherCount = this.vouchers.length;
+        checkComplete();
+      },
+      error: () => {
+        this.vouchers = [];
+        this.voucherCount = 0;
+        checkComplete();
+      }
+    });
+  }
 
   constructor(
     private router: Router,
@@ -1605,13 +1722,13 @@ export class ProfilePage implements OnInit {
   selector: 'app-edit-profile',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
           <ion-button (click)="goBack()">
-            <ion-icon name="arrow-back-outline" color="dark"></ion-icon>
+            <ion-icon name="arrow-back-outline" style="color: white; --color: white;"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="text-align: center;">Edit Profil</ion-title>
+        <ion-title class="zeven-heading" style="text-align: center; color: white;">Edit Profil</ion-title>
         <div slot="end" style="width: 48px;"></div>
       </ion-toolbar>
     </ion-header>
@@ -1653,12 +1770,7 @@ export class ProfilePage implements OnInit {
           </ion-item>
         </div>
 
-        <div class="input-group ion-margin-top">
-          <label>Alamat Default</label>
-          <ion-item lines="none" class="zeven-input-item">
-            <ion-textarea [(ngModel)]="userData.address" placeholder="Alamat Lengkap" rows="3"></ion-textarea>
-          </ion-item>
-        </div>
+
 
         <div class="input-group ion-margin-top">
           <label>Password Baru (opsional)</label>
@@ -1685,7 +1797,7 @@ export class ProfilePage implements OnInit {
     
     .form-container { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
     .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--ion-color-dark); margin-left: 4px; }
-    .zeven-input-item { --background: #f8f9fa; --border-radius: 12px; --padding-start: 12px; border: 1px solid rgba(0,0,0,0.05); }
+    .zeven-input-item { --background: #f8f9fa; --border-radius: 14px; --padding-start: 14px; border: 1px solid rgba(0,0,0,0.03); min-height: 48px; }
     .zeven-input-item.disabled { opacity: 0.6; }
     .hint { font-size: 11px; color: var(--ion-color-medium); margin-left: 4px; margin-top: 4px; display: block; }
   `],
@@ -1793,18 +1905,22 @@ export class EditProfilePage implements OnInit {
   selector: 'app-address-list',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
           <ion-button (click)="goBack()">
-            <ion-icon name="arrow-back-outline" color="dark"></ion-icon>
+            <ion-icon name="arrow-back-outline" style="color: white; --color: white;"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="text-align: center;">Daftar Alamat</ion-title>
+        <ion-title class="zeven-heading" style="text-align: center; color: white;">Daftar Alamat</ion-title>
         <div slot="end" style="width: 48px;"></div>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="zeven-bg ion-padding">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingText="Tarik untuk memuat ulang..." refreshingSpinner="crescent"></ion-refresher-content>
+      </ion-refresher>
+
       <div *ngIf="isLoading" class="ion-text-center ion-padding">
         <ion-spinner color="primary"></ion-spinner>
       </div>
@@ -1876,6 +1992,16 @@ export class AddressListPage implements OnInit {
   isLoading = false;
   trackById(index: number, item: any) { return item?.id || index; }
 
+  doRefresh(event: any) {
+    this.addressService.getAddresses().subscribe({
+      next: (res) => {
+        this.addresses = res;
+        event.target.complete();
+      },
+      error: () => event.target.complete()
+    });
+  }
+
   constructor(
     private router: Router,
     private addressService: AddressService,
@@ -1937,13 +2063,13 @@ export class AddressListPage implements OnInit {
   selector: 'app-address-form',
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar color="tertiary" style="--padding-top: 8px; --padding-bottom: 8px;">
+      <ion-toolbar style="--background: #114232;">
         <ion-buttons slot="start">
-          <ion-button (click)="goBack()" fill="clear" color="dark">
+          <ion-button (click)="goBack()" fill="clear" style="color: white;">
             <ion-icon name="arrow-back-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title class="zeven-heading" style="font-weight: 800; color: #114232; text-align: center;">{{ isEdit ? 'Ubah' : 'Tambah' }} Alamat</ion-title>
+        <ion-title class="zeven-heading" style="font-weight: 800; color: white; text-align: center;">{{ isEdit ? 'Ubah' : 'Tambah' }} Alamat</ion-title>
         <div slot="end" style="width: 48px;"></div>
       </ion-toolbar>
     </ion-header>
